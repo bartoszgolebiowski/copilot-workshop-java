@@ -162,6 +162,118 @@ public JSONObject treeToJson(TreeNode root) {
 }
 ```
 
+#### 4.  **Integracja serwisu płatności z systemem księgowym za pomocą wzorca Adapter**
+
+###### Dlaczego to ważne:
+W środowiskach biznesowych integracja między różnymi systemami jest kluczowa. Wyobraźmy sobie, że serwis płatności zwraca dane transakcji w formacie JSON, ale system księgowy wymaga danych w formacie XML. Zastosowanie wzorca Adapter umożliwia efektywną integrację bez konieczności modyfikacji istniejących systemów.
+
+---
+
+###### Problem biznesowy:
+Firma korzysta z serwisu płatności, który zwraca dane transakcji w formacie JSON, np.:
+```json
+{
+  "transactionId": "ABC123",
+  "amount": 250.75,
+  "currency": "USD",
+  "timestamp": "2025-01-02T10:00:00Z"
+}
+```
+
+System księgowy wymaga danych w formacie XML:
+```xml
+<transaction>
+  <transactionId>ABC123</transactionId>
+  <amount currency="USD">250.75</amount>
+  <timestamp>2025-01-02T10:00:00Z</timestamp>
+</transaction>
+```
+
+---
+
+##### Implementacja wzorca Adapter:
+
+###### 1. Interfejs oczekiwany przez system księgowy:
+```java
+public interface AccountingSystem {
+    String getTransactionInXml(String id);
+}
+```
+
+###### 2. Klasa serwisu płatności zwracającego JSON:
+```java
+import org.json.JSONObject;
+
+public class PaymentService {
+    public String getTransactionDetails(String id) {
+        JSONObject transaction = new JSONObject();
+        transaction.put("transactionId", "ABC123");
+        transaction.put("amount", 250.75);
+        transaction.put("currency", "USD");
+        transaction.put("timestamp", "2025-01-02T10:00:00Z");
+        return transaction.toString();
+    }
+}
+```
+
+###### 3. Adapter przekształcający JSON na XML:
+```java
+import org.json.JSONObject;
+import org.json.XML;
+
+public class PaymentToAccountingAdapter implements AccountingSystem {
+    private final PaymentService paymentService;
+
+    public PaymentToAccountingAdapter(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
+
+    @Override
+    public String getTransactionInXml() {
+        String json = paymentService.getTransactionDetails();
+        JSONObject jsonObject = new JSONObject(json);
+
+        // Dostosowanie do wymagań XML systemu księgowego
+        String xml = XML.toString(jsonObject, "transaction");
+        // Dodanie atrybutu waluty do tagu <amount>
+        xml = xml.replace(
+            "<amount>" + jsonObject.getDouble("amount") + "</amount>",
+            "<amount currency=\"" + jsonObject.getString("currency") + "\">" + jsonObject.getDouble("amount") + "</amount>"
+        );
+        return xml;
+    }
+}
+```
+
+###### 4. Przykład użycia:
+```java
+public class Main {
+    public static void main(String[] args) {
+        // Serwis płatności zwracający JSON
+        PaymentService paymentService = new PaymentService();
+
+        // Adapter przekształcający JSON na XML
+        AccountingSystem accountingAdapter = new PaymentToAccountingAdapter(paymentService);
+
+        // System księgowy używa XML
+        System.out.println("Dane transakcji w formacie XML:");
+        System.out.println(accountingAdapter.getTransactionInXml());
+    }
+}
+```
+
+---
+
+##### Wynik działania programu:
+Na konsoli zostanie wyświetlony wynik w formacie XML, zgodny z wymaganiami systemu księgowego:
+```xml
+<transaction>
+  <transactionId>ABC123</transactionId>
+  <amount currency="USD">250.75</amount>
+  <timestamp>2025-01-02T10:00:00Z</timestamp>
+</transaction>
+```
+
 ---
 
 ### Podsumowanie:
