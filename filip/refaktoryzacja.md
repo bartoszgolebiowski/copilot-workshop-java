@@ -1,24 +1,8 @@
-### Podejście manualne vs AI w refaktoryzacji
+## Refaktoryzacja za pomocą AI
 
-#### Podejście manualne:
+## Podejście z AI:
 
-##### Zalety:
-
-1. **Zrozumienie kodu**: Dogłębna analiza podczas refaktoryzacji
-2. **Precyzja zmian**: Świadome decyzje o każdej modyfikacji
-3. **Kontekst biznesowy**: Uwzględnienie specyfiki projektu
-4. **Kontrola**: Pełna kontrola nad procesem refaktoryzacji
-
-##### Wady:
-
-1. **Czasochłonność**: Ręczna refaktoryzacja zajmuje dużo czasu
-2. **Ryzyko błędów**: Możliwość wprowadzenia nowych błędów
-3. **Niekompletność**: Można przeoczyć miejsca wymagające zmian
-4. **Niespójność**: Różne podejścia różnych programistów
-
-#### Podejście z AI:
-
-##### Zalety:
+#### Zalety:
 
 1. **Szybkość**: Automatyczne propozycje refaktoryzacji
 2. **Spójność**: Jednolite podejście w całym projekcie
@@ -27,19 +11,36 @@
 5. **Testowanie**: Automatyczne generowanie testów dla zmian
 6. **Dokumentacja**: Aktualizacja dokumentacji wraz ze zmianami
 
-##### Wady:
+---
+
+#### Wady:
 
 1. **Nadgorliwość**: Czasem sugeruje zbędne zmiany
 2. **Kontekst**: Może nie uwzględniać specyfiki projektu
 3. **Weryfikacja**: Wymaga sprawdzenia proponowanych zmian
 4. **Złożoność**: Trudności z bardzo złożonymi refaktoryzacjami
 
-### Przykład refaktoryzacji:
+---
 
-#### 1. Zamiana długiej metody na Chain of Responsibility
+## Przykładowe zadania
+
+### 1. Zamiana długiej metody na Chain of Responsibility
+
+Wyobraźmy sobie, że mamy długą metodę `validateOrder`, która sprawdza wiele warunków. AI może zaproponować refaktoryzację do wzorca Chain of Responsibility. Który z kolei pozwoli na podział walidacji na mniejsze kroki i ułatwi dodawanie nowych warunków.
+
+---
+
+Za pomocą przykładowego prompta AI możemy otrzymać propozycję refaktoryzacji:
+
+```plaintext
+Przekształć długą metodę `validateOrder` na wzorzec Chain of Responsibility.
+```
+
+---
+
+**Kod przed refaktoryzacją:**
 
 ```java
-// Przed refaktoryzacją
 public class OrderValidator {
     public boolean validateOrder(Order order) {
         if (order.getItems().isEmpty()) {
@@ -57,8 +58,13 @@ public class OrderValidator {
         return true;
     }
 }
+```
 
-// Po refaktoryzacji
+---
+
+**Kod po refaktoryzacji:**
+
+```java
 public interface OrderValidationStep {
     boolean validate(Order order);
     OrderValidationStep setNext(OrderValidationStep next);
@@ -85,10 +91,36 @@ validator.setNext(new CustomerValidator())
         .setNext(new AddressValidator());
 ```
 
-#### 2. Refaktoryzacja klasy z dużą iloscia parametrów
+---
+
+Dodatkowo AI może zaproponować generację testów jednostkowych dla nowych klas:
 
 ```java
-// Przed refaktoryzacją
+public class ItemsValidatorTest {
+    @Test
+    public void testValidate_EmptyItems_ReturnsFalse() {
+        ItemsValidator validator = new ItemsValidator();
+        Order order = new Order();
+        assertFalse(validator.validate(order));
+    }
+
+    @Test
+    public void testValidate_NonEmptyItems_ReturnsTrue() {
+        ItemsValidator validator = new ItemsValidator();
+        Order order = new Order();
+        order.addItem(new Item("Product", 1));
+        assertTrue(validator.validate(order));
+    }
+}
+```
+
+### 2. Refaktoryzacja klasy z dużą iloscia parametrów
+
+Wyobraźmy sobie, że mamy klasę `UserRegistration` z wieloma parametrami w konstruktorze. AI może zaproponować refaktoryzację do wzorca Builder, co ułatwi tworzenie obiektów tej klasy i zwiększy czytelność kodu.
+
+**Kod przed refaktoryzacją:**
+
+```java
 public class UserRegistration {
     public User register(String name, String email, String password,
                         String address, String phone, String country,
@@ -96,8 +128,14 @@ public class UserRegistration {
         // długi kod rejestracji
     }
 }
+```
 
-// Po refaktoryzacji (Builder Pattern)
+---
+
+**Kod po refaktoryzacji:**
+
+```java
+
 public class UserRegistrationBuilder {
     private String name;
     private String email;
@@ -132,7 +170,15 @@ User user = new UserRegistrationBuilder()
     .register();
 ```
 
-#### 3. Refaktoryzacja duplikacji kodu
+---
+
+### 3. Refaktoryzacja duplikacji kodu
+
+Wyobraźmy sobie, że mamy dwie metody `generatePDFReport` i `generateExcelReport`, które mają wspólny kod. AI może zaproponować refaktoryzację do wzorca Template Method, co pozwoli na wydzielenie wspólnego kodu do jednej metody bazowej.
+
+---
+
+**Kod przed refaktoryzacją:**
 
 ```java
 // Przed refaktoryzacją
@@ -153,6 +199,13 @@ public class ReportGenerator {
         System.out.println("Generowanie Excel");
     }
 }
+```
+
+---
+
+**Kod po refaktoryzacji:**
+
+```java
 
 // Po refaktoryzacji (Template Method)
 public abstract class ReportGenerator {
@@ -185,3 +238,7 @@ public class ExcelReportGenerator extends ReportGenerator {
     }
 }
 ```
+
+## Podsumowanie
+
+Refaktoryzacja za pomocą AI może przyspieszyć proces poprawy kodu, zapewniając jednocześnie spójność i kompleksowość zmian. Warto jednak pamiętać o weryfikacji proponowanych zmian oraz dostosowaniu ich do specyfiki projektu. AI może być cennym narzędziem w codziennym procesie rozwoju oprogramowania, ale nie zastąpi w pełni ludzkiej wiedzy i doświadczenia.

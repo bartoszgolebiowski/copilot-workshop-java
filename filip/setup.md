@@ -1,111 +1,89 @@
 # Konfiguracja projektu z GitHub Copilot
 
-## Wprowadzenie
+## Scenariusz
 
-GitHub Copilot wspiera konfigurację projektu poprzez:
+Wyobraźmy sobie, że dołączamy do nowego projektu e-commerce, który wymaga:
 
-- **Generowanie plików konfiguracyjnych**
+- Migracji z Maven do Gradle
+- Konfiguracji CI/CD pipeline
+- Setupu środowiska z PostgreSQL
+- Konteneryzacji aplikacji
 
-  - `package.json` dla npm
-  - `requirements.txt` dla pip
-  - `pom.xml` dla Maven
+## Story 1: Migracja Build Tool
 
-- **Wsparcie zależności**
+Team zdecydował się przejść z Maven na Gradle dla lepszej wydajności buildów.
 
-  - Sugestie nowych zależności
-  - Aktualizacja do najnowszych wersji
-  - Rozwiązywanie konfliktów
-  - Automatyczna dokumentacja
+---
 
-- **Integracja DevOps**
-  - Konfiguracja GitHub Actions
-  - Automatyzacja CI/CD
-  - Generowanie dokumentacji
+#### Dlaczego to ważne
 
-## Przykłady użycia
+Gradle jest bardziej elastyczny i wydajny niż Maven, co pozwoli na szybsze budowanie projektu. Zarówno Maven, jak i Gradle są popularnymi narzędziami do budowania projektów Java ich poprawne skonfigurowanie jest kluczowe dla wydajności i skalowalności projektu.
 
-### 1. Migracja Maven → Gradle
+---
 
-### 1. Migracja z Maven do Gradle
+#### Problem
 
-Mając pom.xml:
+Mamy istniejący `pom.xml` z wieloma zależnościami i pluginami:
 
 ```xml
 <project>
     <groupId>com.example</groupId>
     <artifactId>demo</artifactId>
-    <version>1.0.0</version>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>3.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.7.1</version>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+    <!-- ... reszta konfiguracji -->
 </project>
 ```
 
-Copilot może wygenerować równoważny build.gradle:
+---
+
+#### Rozwiązanie z copilot
+
+Z pomocą AI możemy wygenerować odpowiedni `build.gradle`:
 
 ```gradle
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.0'
-    id 'io.spring.dependency-management' version '1.1.4'
 }
-
-group = 'com.example'
-version = '1.0.0'
-sourceCompatibility = '17'
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.postgresql:postgresql:42.7.1'
-}
+// ... reszta konfiguracji
 ```
 
-### 2. Zaawansowany pipeline CI/CD
+## Story 2: Automatyzacja CI/CD
+
+#### Sytuacja wyjściowa
+
+Team potrzebuje zautomatyzować proces budowania i wdrażania aplikacji. Obecnie cały proces jest wykonywany ręcznie, co prowadzi do błędów i opóźnień.
+
+---
+
+#### Dlaczego to ważne
+
+Automatyzacja CI/CD pozwala na szybsze dostarczanie wartości dla klienta, a także zwiększa jakość kodu poprzez wczesne wykrywanie błędów. Dzięki temu zespół może skupić się na tworzeniu nowych funkcjonalności zamiast na ręcznym budowaniu i deployowaniu aplikacji.
+
+---
+
+#### Problem
+
+- Brak automatycznych testów przy każdym commit'cie
+- Ręczne budowanie i deployowanie aplikacji
+- Brak spójnego procesu między środowiskami
+- Problemy z zarządzaniem zależnościami
+
+---
+
+#### Rozwiązanie z Copilot
+
+GitHub Copilot pomógł wygenerować kompletny pipeline:
 
 ```yaml
-name: Java CI/CD Pipeline
-
+name: E-commerce CI/CD
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
     branches: [main]
 
 jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Code quality check
-        uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
   test:
-    needs: validate
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -115,11 +93,6 @@ jobs:
           POSTGRES_PASSWORD: test
         ports:
           - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - uses: actions/checkout@v3
@@ -128,91 +101,116 @@ jobs:
         with:
           java-version: "17"
           distribution: "temurin"
-          cache: "gradle"
 
-      - name: Run tests
+      - name: Run Tests
         run: ./gradlew test
         env:
+          SPRING_PROFILES_ACTIVE: test
           DB_URL: jdbc:postgresql://localhost:5432/testdb
-          DB_USER: postgres
-          DB_PASS: test
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: test-results
-          path: build/reports/tests/
-
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build
-        run: ./gradlew bootJar
-      - name: Docker build
-        run: |
-          docker build -t myapp:${{ github.sha }} .
-          docker tag myapp:${{ github.sha }} myapp:latest
 
   deploy:
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
-    environment: production
+    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Deploy to k8s
-        uses: azure/k8s-deploy@v1
-        with:
-          manifests: |
-            k8s/deployment.yaml
-            k8s/service.yaml
+      - name: Deploy to production
+        run: ./gradlew bootJar
 ```
 
-### 3. Dockerfile z wieloetapowym buildem
+## Story 3: Konteneryzacja aplikacji
 
-```Dockerfile
+#### Sytuacja wyjściowa
+
+Team potrzebuje skonteneryzować aplikację dla spójnego środowiska uruchomieniowego. Obecnie aplikacja jest uruchamiana bezpośrednio na maszynach, co powoduje problemy z konfiguracją i skalowaniem.
+
+---
+
+#### Dlaczego to ważne
+
+Konteneryzacja pozwala na spójne środowisko w całym cyklu życia aplikacji - od developmentu po produkcję. Eliminuje problemy "na moim działa", upraszcza wdrożenia i skalowanie, a także zwiększa bezpieczeństwo poprzez izolację aplikacji.
+
+---
+
+#### Problem
+
+- Różnice w środowiskach developerskich
+- Duży rozmiar obrazu produkcyjnego
+- Brak optymalizacji warstw Dockera
+- Problemy z cache podczas budowania
+- Nieefektywne wykorzystanie zasobów
+
+---
+
+#### Rozwiązanie z Copilot
+
+GitHub Copilot wygenerował zoptymalizowany multi-stage Dockerfile:
+
+```dockerfile
 # Build stage
-FROM gradle:8.5-jdk17 AS build
+FROM gradle:8.5-jdk17-alpine AS builder
 WORKDIR /app
-COPY . .
+COPY build.gradle settings.gradle ./
+COPY src ./src
 RUN gradle bootJar --no-daemon
 
 # Run stage
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+# Configuration
+ENV SPRING_PROFILES_ACTIVE=prod
+ENV SERVER_PORT=8080
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD wget --quiet --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+
+# Run with proper memory settings
+ENTRYPOINT ["java", \
+  "-XX:+UseContainerSupport", \
+  "-XX:MaxRAMPercentage=75.0", \
+  "-jar", "app.jar"]
 ```
 
-## Podsumowanie
+# Podsumowanie wsparcia GitHub Copilot w konfiguracji projektu
 
-Wszystkie powyższe pliki konfiguracyjne zostały wygenerowane przy pomocy GitHub Copilot:
+## Korzyści w poszczególnych obszarach
 
-### Wygenerowane pliki:
+### 1. Migracja build tool (Maven → Gradle)
 
-1. **pom.xml/build.gradle**
+- ✓ Automatyczna konwersja zależności
+- ✓ Zachowanie spójnej struktury
+- ✓ Sugestie najnowszych wersji bibliotek
+- ✓ Eliminacja błędów konfiguracji
 
-   - Konfiguracja projektu Java
-   - Zarządzanie zależnościami
-   - Ustawienia buildu
+### 2. Konfiguracja CI/CD
 
-2. **GitHub Actions workflows**
+- ✓ Generowanie gotowych workflows
+- ✓ Integracja z popularnymi serwisami
+- ✓ Optymalizacja kroków pipeline
+- ✓ Automatyczna konfiguracja testów
 
-   - Pipeline CI/CD
-   - Automatyzacja testów
-   - Proces deploymentu
+### 3. Konteneryzacja
 
-3. **Dockerfile**
-   - Multi-stage build
-   - Optymalizacja obrazu
-   - Konfiguracja uruchomieniowa
+- ✓ Multi-stage build patterns
+- ✓ Optymalizacja warstw
+- ✓ Best practices dla JVM
+- ✓ Security hardening
 
-### Korzyści z użycia AI:
+## Eliminacja typowych problemów
 
-- Szybkie generowanie boilerplate code
-- Spójne konwencje nazewnicze
-- Aktualne wersje zależności
-- Best practices w konfiguracji
-- Kompleksowa dokumentacja
+1. Błędy składni w plikach YAML
+2. Niespójne wersje zależności
+3. Nieoptymalne konfiguracje
+4. Brakujące kroki w pipeline
+5. Problemy z cache w Dockerze
+
+## Wartość biznesowa
+
+1. Szybsze wdrożenie zmian
+2. Mniej błędów w konfiguracji
+3. Spójne środowiska
+4. Łatwiejszy onboarding
+5. Niższe koszty utrzymania

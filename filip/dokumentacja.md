@@ -1,24 +1,8 @@
-### Podejście manualne vs AI w dokumentacji
+## Pomoc Ai w tworzeniu dokumentacji
 
-#### Podejście manualne:
+## Podejście z AI:
 
-##### Zalety:
-
-1. **Dokładność**: Programista precyzyjnie opisuje wszystkie aspekty kodu
-2. **Kontekst biznesowy**: Lepsze zrozumienie i przekazanie logiki biznesowej
-3. **Spójność**: Jednolity styl dokumentacji w całym projekcie
-4. **Świadome decyzje**: Celowy wybór co i jak dokumentować
-
-##### Wady:
-
-1. **Czasochłonność**: Pisanie dokumentacji zajmuje dużo czasu
-2. **Niekompletność**: Można pominąć ważne szczegóły
-3. **Nieaktualność**: Dokumentacja często nie nadąża za zmianami w kodzie
-4. **Brak standardów**: Różni programiści mogą dokumentować w różny sposób
-
-#### Podejście z AI:
-
-##### Zalety:
+#### Zalety:
 
 1. **Szybkość**: Generowanie dokumentacji w kilka sekund
 2. **Kompleksowość**: AI pamięta o dokumentowaniu wszystkich aspektów
@@ -27,19 +11,29 @@
 5. **Aktualizacje**: Łatwiejsze utrzymywanie dokumentacji na bieżąco
 6. **Wielojęzyczność**: Możliwość generowania w różnych językach
 
-##### Wady:
+---
 
-1. **Ogólnikowość**: Czasem generuje zbyt ogólne opisy
-2. **Kontekst**: Może brakować specyficznego kontekstu biznesowego
-3. **Weryfikacja**: Wymaga sprawdzenia poprawności wygenerowanej treści
-4. **Techniczny język**: Może być zbyt techniczne dla nietechnicznych odbiorców
+#### Wady:
 
-### Najlepsze praktyki:
+1. **Brak kontekstu**: AI może nie zawsze zrozumieć kontekst biznesowy
+2. **Weryfikacja**: Konieczność ręcznej weryfikacji wygenerowanej dokumentacji
+
+---
+
+#### Najlepsze praktyki:
 
 1. **Podejście hybrydowe**: Używaj AI do generowania szkieletu, uzupełniaj ręcznie o kontekst biznesowy
 2. **Weryfikacja**: Zawsze sprawdzaj wygenerowaną dokumentację
 3. **Aktualizacje**: Regularnie aktualizuj dokumentację przy zmianach w kodzie
 4. **Standardy**: Ustal i utrzymuj spójne standardy dokumentacji
+
+---
+
+## Przykładowe zadanie
+
+Wyobraźmy sobie, że utworzyliśmy przykładowe klasy `OrderProcessor`, `PaymentService` i `InventoryService` w systemie obsługi zamówień. Otrzymaliśmy jednak sugestię, aby dodać dokumentację do klasy `OrderProcessor` i utworzyć diagram sekwencji dla metody `processOrder`. Oczywiście, możemy to zrobić ręcznie, ale z pomocą AI możemy to zrobić szybciej i bardziej spójnie.
+
+**Kod klasy `OrderProcessor`:**
 
 ```java
 public class OrderProcessor {
@@ -67,7 +61,17 @@ public class OrderProcessor {
 }
 ```
 
-Podstawowa dokumentacja dla klasy `OrderProcessor`:
+---
+
+Teraz za pomocą prostego prompta AI możemy wygenerować dokumentację dla tej klasy:
+
+```plaintext
+Generuj dokumentację dla klasy OrderProcessor zależnej od PaymentService i InventoryService oraz diagramu sekwencji dla metody processOrder. Zwróc dokumentacje w formacie Markdown oraz diagram w formacie Mermaid.
+```
+
+---
+
+Otrzymana dokumentacja dla klasy `OrderProcessor`:
 
 ```markdown
 # Order Processing System
@@ -81,6 +85,8 @@ Klasa odpowiedzialna za przetwarzanie zamówień w systemie e-commerce.
 - `PaymentService` - serwis obsługujący płatności
 - `InventoryService` - serwis zarządzający stanami magazynowymi
 ```
+
+---
 
 ### Diagram sekwencji
 
@@ -103,9 +109,21 @@ sequenceDiagram
     end
 ```
 
-### Generowanie javadoca
+## Generowanie javadoca
 
-Za pomocą AI można wygenerować szkielet dokumentacji Javadoc dla klasy `OrderProcessor`:
+Wraz z upływem czasu, nasz kod na projekcie rośnie, a dokumentacja staje się coraz bardziej istotna. Dlatego warto zadbać o to, aby była ona aktualna i zgodna z kodem. AI może pomóc w generowaniu komentarzy Javadoc dla klas, metod i pól, co ułatwi zrozumienie kodu dla innych programistów (np. osób, które nie mają jeszcze wiedzy domenowej na naszym projekcie).
+
+---
+
+Za pomocą prompta AI możemy poprosić o wygenerowanie komentarzy Javadoc dla klasy `OrderProcessor`:
+
+```plaintext
+Generuj komentarze Javadoc dla klasy OrderProcessor z opisem konstruktora, metody processOrder oraz z opisem zależności PaymentService i InventoryService.
+```
+
+---
+
+**W rezultacie otrzymujemy gotową klase wraz z komentarzami Javadoc:**
 
 ```java
 /**
@@ -173,3 +191,7 @@ public class OrderProcessor {
     }
 }
 ```
+
+## Podsumowanie
+
+AI może być skutecznym narzędziem w generowaniu dokumentacji, komentarzy Javadoc i diagramów dla kodu źródłowego. Dzięki temu programiści mogą skupić się na implementacji funkcjonalności, a AI zajmie się generowaniem dokumentacji. Warto jednak pamiętać, że AI nie zastąpi w pełni ludzkiego myślenia i weryfikacji, dlatego zawsze warto sprawdzić wygenerowaną dokumentację i dostosować ją do konkretnych potrzeb projektu.

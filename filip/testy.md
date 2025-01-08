@@ -1,4 +1,6 @@
-### 1. Dlaczego korzystać z testów?
+# Testy jednostkowe z użyciem AI
+
+## 1. Dlaczego korzystać z testów?
 
 Testy zapewniają:
 
@@ -7,6 +9,8 @@ Testy zapewniają:
 3. **Pewność zmian**: Ułatwiają refaktoryzację i rozwój kodu
 4. **Jakość**: Wymuszają lepszy design i modularność kodu
 
+---
+
 ### Dlaczego używać AI do testowania?
 
 1. **Szybkość**: Automatyczne generowanie testów jednostkowych
@@ -14,9 +18,11 @@ Testy zapewniają:
 3. **Spójność**: Generuje testy zgodne z konwencjami
 4. **Oszczędność czasu**: Mniej pisania boilerplate code
 
-#### 2. Przykład
+---
 
-Przykładowy kontroler z kilkoma endpointami, które można przetestować:
+## 2. Przykład
+
+Wyobraźmy sobie, że mamy prostą aplikację Spring Boot do zarządzania użytkownikami. Chcemy napisać testy jednostkowe dla kontrolera `UserController`.
 
 ```java
 // UserController.java
@@ -65,7 +71,15 @@ public class UserController {
 }
 ```
 
-Przykładowe testy jednostkowe dla kontrolera wygenerowane za pomoca Copilota:
+Za pomocą AI możemy wygenerować testy jednostkowe dla kontrolera `UserController`:
+
+```plaintext
+Wygeneruj testy jednostkowe dla kontrolera `UserController`.
+```
+
+---
+
+## 3. Wygenerowane testy
 
 ```java
 // UserControllerTest.java
@@ -166,3 +180,9 @@ class UserControllerTest {
     }
 }
 ```
+
+---
+
+### 3. Podsumowanie
+
+Dzięki wygenerowanym testom jednostkowym mamy pewność, że nasz kontroler działa zgodnie z oczekiwaniami. Testy jednostkowe są ważnym elementem w procesie wytwarzania oprogramowania, a ich automatyzacja za pomocą AI pozwala zaoszczędzić czas i zwiększyć jakość kodu.
